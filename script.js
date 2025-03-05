@@ -8,13 +8,43 @@ const saveBtn = document.getElementById('saveBtn');
 
 // Initialize camera
 async function initCamera() {
+    const cameraMessage = document.getElementById('camera-message');
+    const enableCameraBtn = document.getElementById('enableCameraBtn');
+    const videoElement = document.getElementById('video');
+
     try {
-        stream = await navigator.mediaDevices.getUserMedia({ video: true });
-        video.srcObject = stream;
+        stream = await navigator.mediaDevices.getUserMedia({ 
+            video: { 
+                facingMode: 'user',
+                width: { ideal: 1280 },
+                height: { ideal: 720 }
+            } 
+        });
+        videoElement.srcObject = stream;
+        cameraMessage.style.display = 'none';
+        videoElement.style.display = 'block';
+        captureBtn.disabled = false;
     } catch (err) {
         console.error('Error accessing camera:', err);
+        cameraMessage.style.display = 'block';
+        videoElement.style.display = 'none';
+        captureBtn.disabled = true;
     }
 }
+
+// Add camera enable button handler
+document.getElementById('enableCameraBtn').addEventListener('click', async () => {
+    await initCamera();
+});
+
+// Modify existing camera initialization
+window.addEventListener('load', async () => {
+    if ('mediaDevices' in navigator && 'getUserMedia' in navigator.mediaDevices) {
+        await initCamera();
+    } else {
+        alert('กล้องไม่พร้อมใช้งาน หรือ เบราว์เซอร์ไม่รองรับการใช้งานกล้อง');
+    }
+});
 
 // Add after initCamera()
 const uploadBtn = document.getElementById('uploadBtn');

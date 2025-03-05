@@ -243,6 +243,21 @@ body {
     }
 }
 
+.camera-message {
+    background: rgba(255, 255, 255, 0.9);
+    padding: 20px;
+    border-radius: 10px;
+    text-align: center;
+    margin: 20px auto;
+    max-width: 400px;
+}
+
+.camera-message p {
+    color: #d81b60;
+    margin-bottom: 15px;
+    font-size: 1.2em;
+}
+
 /* Responsive Design */
 @media (max-width: 768px) {
     .container {
