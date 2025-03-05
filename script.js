@@ -6,29 +6,48 @@ const captureBtn = document.getElementById('captureBtn');
 const editBtn = document.getElementById('editBtn');
 const saveBtn = document.getElementById('saveBtn');
 
-// Initialize camera
+// Initialize camera with better error handling
 async function initCamera() {
     const cameraMessage = document.getElementById('camera-message');
-    const enableCameraBtn = document.getElementById('enableCameraBtn');
     const videoElement = document.getElementById('video');
-
+    
     try {
-        stream = await navigator.mediaDevices.getUserMedia({ 
-            video: { 
+        // Make sure any old stream is stopped
+        if (stream) {
+            stream.getTracks().forEach(track => track.stop());
+        }
+
+        stream = await navigator.mediaDevices.getUserMedia({
+            video: {
                 facingMode: 'user',
                 width: { ideal: 1280 },
                 height: { ideal: 720 }
-            } 
+            },
+            audio: false
         });
+
         videoElement.srcObject = stream;
+        await videoElement.play(); // Ensure video is playing
+
+        // Wait for video to be ready
+        await new Promise((resolve) => {
+            videoElement.onloadedmetadata = () => {
+                canvas.width = videoElement.videoWidth;
+                canvas.height = videoElement.videoHeight;
+                resolve();
+            };
+        });
+
         cameraMessage.style.display = 'none';
         videoElement.style.display = 'block';
         captureBtn.disabled = false;
+        
     } catch (err) {
-        console.error('Error accessing camera:', err);
+        console.error('Camera error:', err);
         cameraMessage.style.display = 'block';
         videoElement.style.display = 'none';
         captureBtn.disabled = true;
+        alert('กรุณาอนุญาตการใช้งานกล้อง หรือตรวจสอบว่ากล้องไม่ได้ถูกใช้งานโดยโปรแกรมอื่น');
     }
 }
 
@@ -78,25 +97,45 @@ fileInput.addEventListener('change', (e) => {
     });
 });
 
-// Capture photo
+// Fixed capture photo function
 captureBtn.addEventListener('click', () => {
+    if (!stream || !video.srcObject) {
+        alert('กรุณารอให้กล้องพร้อมใช้งาน');
+        return;
+    }
+
     if (photoCount >= 3) {
         photoCount = 0;
     }
-    
+
     const context = canvas.getContext('2d');
+    
+    // Ensure correct dimensions
     canvas.width = video.videoWidth;
     canvas.height = video.videoHeight;
+    
+    // Draw the video frame to canvas
     context.drawImage(video, 0, 0, canvas.width, canvas.height);
     
-    const photoImg = document.getElementById(`photo${photoCount + 1}`);
-    photoImg.src = canvas.toDataURL('image/png');
-    
-    photoCount++;
-    
-    if (photoCount === 3) {
-        editBtn.disabled = false;
-        captureBtn.disabled = true;
+    try {
+        const photoImg = document.getElementById(`photo${photoCount + 1}`);
+        if (!photoImg) {
+            throw new Error('Cannot find photo element');
+        }
+        
+        const dataUrl = canvas.toDataURL('image/jpeg', 0.8);
+        photoImg.onload = () => {
+            photoCount++;
+            if (photoCount === 3) {
+                editBtn.disabled = false;
+                captureBtn.disabled = true;
+            }
+        };
+        photoImg.src = dataUrl;
+        
+    } catch (error) {
+        console.error('Error capturing photo:', error);
+        alert('เกิดข้อผิดพลาดในการถ่ายภาพ กรุณาลองใหม่');
     }
 });
 
@@ -290,21 +329,41 @@ document.querySelectorAll('.frame-option').forEach(frame => {
     });
 });
 
-// Save functionality
+// Fix save functionality
 saveBtn.addEventListener('click', () => {
-    const link = document.createElement('a');
-    link.download = 'photobooth-photos.png';
-    const mergeCanvas = document.createElement('canvas');
-    mergeCanvas.width = 600;
-    mergeCanvas.height = 200;
-    const ctx = mergeCanvas.getContext('2d');
-    
-    document.querySelectorAll('.photo').forEach((photo, index) => {
-        ctx.drawImage(photo, index * 200, 0, 200, 200);
-    });
-    
-    link.href = mergeCanvas.toDataURL();
-    link.click();
+    try {
+        const mergeCanvas = document.createElement('canvas');
+        const ctx = mergeCanvas.getContext('2d');
+        
+        // Set appropriate dimensions
+        mergeCanvas.width = 600;
+        mergeCanvas.height = 200;
+        
+        // Draw each photo
+        const photos = document.querySelectorAll('.photo');
+        let validPhotos = 0;
+        
+        photos.forEach((photo, index) => {
+            if (photo.complete && photo.naturalHeight !== 0) {
+                ctx.drawImage(photo, index * 200, 0, 200, 200);
+                validPhotos++;
+            }
+        });
+        
+        if (validPhotos === 0) {
+            throw new Error('No valid photos to save');
+        }
+        
+        // Create download link
+        const link = document.createElement('a');
+        link.download = `photobooth-${new Date().getTime()}.jpg`;
+        link.href = mergeCanvas.toDataURL('image/jpeg', 0.8);
+        link.click();
+        
+    } catch (error) {
+        console.error('Error saving photos:', error);
+        alert('เกิดข้อผิดพลาดในการบันทึกภาพ กรุณาลองใหม่');
+    }
 });
 
 // Handle window resize for responsive layout
@@ -314,6 +373,13 @@ window.addEventListener('resize', () => {
         editor.style.maxWidth = '100%';
     } else {
         editor.style.maxWidth = '1000px';
+    }
+});
+
+// Cleanup on page unload
+window.addEventListener('beforeunload', () => {
+    if (stream) {
+        stream.getTracks().forEach(track => track.stop());
     }
 });
 
