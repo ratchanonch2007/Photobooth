@@ -1,3 +1,18 @@
+function lockOrientation() {
+    try {
+        if (screen.orientation && screen.orientation.lock) {
+            screen.orientation.lock('landscape').catch(function(error) {
+                console.log('Orientation lock failed:', error);
+            });
+        }
+    } catch (error) {
+        console.log('Orientation API not supported');
+    }
+}
+
+// Call this when page loads
+document.addEventListener('DOMContentLoaded', lockOrientation);
+
 let stream;
 let photoCount = 0;
 
@@ -27,7 +42,11 @@ async function initCamera() {
 
         const stream = await navigator.mediaDevices.getUserMedia(constraints);
         currentStream = stream;
-        document.getElementById('video').srcObject = stream;
+        video.srcObject = stream;
+        
+        // Force video element to update orientation
+        video.style.transform = facingMode === 'environment' ? 'scaleX(-1)' : 'none';
+        
     } catch (err) {
         console.error('Error accessing camera:', err);
         alert('กรุณาอนุญาตการใช้งานกล้อง');
@@ -235,6 +254,40 @@ document.querySelectorAll('.frame-option').forEach(option => {
         });
     });
 });
+
+// Update button event handlers
+function addButtonListeners(buttonElement) {
+    const events = ['touchstart', 'touchend', 'mousedown', 'mouseup'];
+    
+    events.forEach(eventType => {
+        buttonElement.addEventListener(eventType, (e) => {
+            e.preventDefault();
+            
+            if (eventType === 'touchstart' || eventType === 'mousedown') {
+                buttonElement.style.transform = 'scale(0.95)';
+                buttonElement.style.opacity = '0.8';
+            } else {
+                buttonElement.style.transform = 'scale(1)';
+                buttonElement.style.opacity = '1';
+                
+                // Trigger click only on touchend/mouseup
+                if (e.type === 'touchend') {
+                    buttonElement.click();
+                }
+            }
+        }, { passive: false });
+    });
+}
+
+// Apply listeners to all buttons
+document.querySelectorAll('.btn, .delete-btn, .frame-option').forEach(button => {
+    addButtonListeners(button);
+});
+
+// Fix double-tap zoom on mobile
+document.addEventListener('touchend', (e) => {
+    e.preventDefault();
+}, { passive: false });
 
 // เพิ่ม touch events สำหรับปุ่มต่างๆ
 document.querySelectorAll('.btn, .frame-option, .delete-btn').forEach(el => {
