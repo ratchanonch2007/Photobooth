@@ -76,6 +76,11 @@ body {
     margin: 30px 0;
 }
 
+.photo-container {
+    position: relative;
+    display: inline-block;
+}
+
 .photo {
     width: 200px;
     height: 150px;
@@ -89,6 +94,30 @@ body {
     transform: scale(1.05);
 }
 
+.delete-btn {
+    position: absolute;
+    top: -10px;
+    right: -10px;
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    background: #ff4444;
+    border: 2px solid white;
+    color: white;
+    font-size: 16px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+    transition: all 0.3s ease;
+}
+
+.delete-btn:hover {
+    background: #ff1111;
+    transform: scale(1.1);
+}
+
 .frame-options {
     display: flex;
     justify-content: center;
@@ -97,22 +126,30 @@ body {
 }
 
 .frame-option {
-    width: 100px;
-    height: 300px;
+    width: 60px;
+    height: 60px;
     border: 3px solid #FFB6C1;
-    border-radius: 10px;
+    border-radius: 50%;
     cursor: pointer;
     transition: transform 0.3s;
-    padding: 5px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: white;
+    margin: 10px;
+}
+
+.frame-emoji {
+    font-size: 2em;
 }
 
 .frame-option:hover {
-    transform: scale(1.05);
+    transform: scale(1.1);
 }
 
 .frame-option.selected {
     border-color: #FF69B4;
-    box-shadow: 0 0 10px rgba(255, 105, 180, 0.5);
+    box-shadow: 0 0 15px rgba(255, 105, 180, 0.5);
 }
 
 .frame-preview {
@@ -130,10 +167,93 @@ body {
 @media (max-width: 768px) {
     .container {
         padding: 10px;
+        margin: 0;
+        border-radius: 0;
+        min-height: 100vh;
     }
     
+    .title {
+        font-size: 1.8em;
+        margin: 10px 0;
+    }
+
+    #video {
+        max-width: 100%;
+        height: auto;
+        border-width: 3px;
+    }
+
+    .btn {
+        padding: 15px 30px;
+        font-size: 1.2em;
+        width: 45%;
+        max-width: 200px;
+    }
+
+    .frame-options {
+        padding: 10px 0;
+        flex-wrap: wrap;
+    }
+
+    .frame-option {
+        width: 50px;
+        height: 50px;
+        margin: 5px;
+    }
+
+    .frame-emoji {
+        font-size: 1.5em;
+    }
+
+    .delete-btn {
+        width: 35px;
+        height: 35px;
+        font-size: 20px;
+    }
+
+    .photo-container {
+        width: 45%;
+    }
+
     .photo {
-        width: 150px;
-        height: 120px;
+        width: 100%;
+        height: auto;
+        aspect-ratio: 4/3;
+    }
+}
+
+/* Small Mobile Devices */
+@media (max-width: 480px) {
+    .btn {
+        padding: 12px 20px;
+        font-size: 1.1em;
+    }
+
+    .captured-photos {
+        gap: 10px;
+    }
+
+    .photo-container {
+        width: 100%;
+        max-width: 300px;
+    }
+}
+
+/* Fix Touch Interactions */
+@media (hover: none) {
+    .btn:hover {
+        transform: none;
+    }
+
+    .frame-option:hover {
+        transform: none;
+    }
+
+    .photo:hover {
+        transform: none;
+    }
+
+    .delete-btn:active {
+        transform: scale(0.95);
     }
 }

@@ -2,7 +2,9 @@
 <html lang="th">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
     <title>Photo Booth สุดน่ารัก</title>
     <link href="https://fonts.googleapis.com/css2?family=Prompt:wght@400;600&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="styles.css">
@@ -22,23 +24,32 @@
 
             <div class="frame-options">
                 <div class="frame-option" data-frame="classic">
-                    <img src="frames/classic.png" alt="Classic Frame" class="frame-preview">
+                    <div class="frame-emoji">✨</div>
                 </div>
                 <div class="frame-option" data-frame="hearts">
-                    <img src="frames/hearts.png" alt="Hearts Frame" class="frame-preview">
+                    <div class="frame-emoji">💖</div>
                 </div>
                 <div class="frame-option" data-frame="stars">
-                    <img src="frames/stars.png" alt="Stars Frame" class="frame-preview">
+                    <div class="frame-emoji">⭐</div>
                 </div>
                 <div class="frame-option" data-frame="cute">
-                    <img src="frames/cute.png" alt="Cute Frame" class="frame-preview">
+                    <div class="frame-emoji">🌸</div>
                 </div>
             </div>
 
             <div class="captured-photos">
-                <img id="photo1" class="photo" alt="ภาพที่ 1">
-                <img id="photo2" class="photo" alt="ภาพที่ 2">
-                <img id="photo3" class="photo" alt="ภาพที่ 3">
+                <div class="photo-container">
+                    <img id="photo1" class="photo" alt="ภาพที่ 1">
+                    <button class="delete-btn" data-photo="1">×</button>
+                </div>
+                <div class="photo-container">
+                    <img id="photo2" class="photo" alt="ภาพที่ 2">
+                    <button class="delete-btn" data-photo="2">×</button>
+                </div>
+                <div class="photo-container">
+                    <img id="photo3" class="photo" alt="ภาพที่ 3">
+                    <button class="delete-btn" data-photo="3">×</button>
+                </div>
             </div>
         </div>
     </div>
