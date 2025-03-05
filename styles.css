@@ -94,11 +94,44 @@ body {
     padding: 8px 15px;
     border-radius: 15px;
     cursor: pointer;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 5px;
+    width: 120px;
+    height: 120px;
+}
+
+.filter-preview {
+    width: 100px;
+    height: 75px;
+    border-radius: 8px;
+    object-fit: cover;
+}
+
+.sticker-preview {
+    position: fixed;
+    background: white;
+    padding: 10px;
+    border-radius: 8px;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.2);
+    z-index: 1000;
+    pointer-events: none;
+}
+
+.sticker-preview img {
+    width: 150px;
+    height: 150px;
+    object-fit: contain;
 }
 
 .sticker {
-    width: 50px;
-    height: 50px;
+    width: 60px;
+    height: 60px;
+    padding: 5px;
+    background: white;
+    border-radius: 8px;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
     cursor: pointer;
     transition: transform 0.3s;
 }
@@ -167,9 +200,10 @@ body {
 
 .stickers-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(60px, 1fr));
+    grid-template-columns: repeat(auto-fill, minmax(80px, 1fr));
     gap: 10px;
     margin: 10px 0;
+    padding: 10px;
 }
 
 .effect-preview {
@@ -186,5 +220,56 @@ body {
     }
     50% {
         transform: translateY(-10px);
+    }
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .container {
+        padding: 10px;
+    }
+
+    .edit-options {
+        flex-direction: column;
+    }
+
+    .filters-grid {
+        grid-template-columns: repeat(auto-fill, minmax(80px, 1fr));
+    }
+
+    .filter-btn {
+        width: 80px;
+        height: 100px;
+    }
+
+    .filter-preview {
+        width: 70px;
+        height: 50px;
+    }
+
+    .frame-option {
+        width: 80px;
+        height: 80px;
+    }
+
+    .sticker {
+        width: 50px;
+        height: 50px;
+    }
+}
+
+@media (max-width: 480px) {
+    .captured-photos {
+        flex-direction: column;
+        align-items: center;
+    }
+
+    .photo {
+        width: 280px;
+        height: 210px;
+    }
+
+    .decoration-category {
+        padding: 10px;
     }
 }

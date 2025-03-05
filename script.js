@@ -97,6 +97,30 @@ document.querySelectorAll('.sticker').forEach(sticker => {
     });
 });
 
+// Enhanced sticker preview
+document.querySelectorAll('.sticker').forEach(sticker => {
+    sticker.addEventListener('mouseover', (e) => {
+        const preview = document.createElement('div');
+        preview.className = 'sticker-preview';
+        preview.innerHTML = `<img src="${sticker.src}" alt="Sticker Preview">`;
+        document.body.appendChild(preview);
+        
+        const updatePreviewPosition = (event) => {
+            const rect = sticker.getBoundingClientRect();
+            preview.style.left = rect.right + 10 + 'px';
+            preview.style.top = rect.top + 'px';
+        };
+        
+        updatePreviewPosition(e);
+        document.addEventListener('mousemove', updatePreviewPosition);
+        
+        sticker.addEventListener('mouseout', () => {
+            preview.remove();
+            document.removeEventListener('mousemove', updatePreviewPosition);
+        }, { once: true });
+    });
+});
+
 document.querySelectorAll('.photo').forEach(photo => {
     photo.addEventListener('dragover', (e) => {
         e.preventDefault();
@@ -175,6 +199,16 @@ saveBtn.addEventListener('click', () => {
     
     link.href = mergeCanvas.toDataURL();
     link.click();
+});
+
+// Handle window resize for responsive layout
+window.addEventListener('resize', () => {
+    const editor = document.querySelector('.editor');
+    if (window.innerWidth <= 768) {
+        editor.style.maxWidth = '100%';
+    } else {
+        editor.style.maxWidth = '1000px';
+    }
 });
 
 // Initialize
