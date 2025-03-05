@@ -98,44 +98,59 @@ fileInput.addEventListener('change', (e) => {
 });
 
 // Fixed capture photo function
-captureBtn.addEventListener('click', () => {
-    if (!stream || !video.srcObject) {
-        alert('กรุณารอให้กล้องพร้อมใช้งาน');
-        return;
-    }
-
-    if (photoCount >= 3) {
-        photoCount = 0;
-    }
-
-    const context = canvas.getContext('2d');
-    
-    // Ensure correct dimensions
-    canvas.width = video.videoWidth;
-    canvas.height = video.videoHeight;
-    
-    // Draw the video frame to canvas
-    context.drawImage(video, 0, 0, canvas.width, canvas.height);
-    
+captureBtn.addEventListener('click', async () => {
     try {
+        if (!stream || !video.srcObject) {
+            throw new Error('Camera not ready');
+        }
+
+        // Reset counter if needed
+        if (photoCount >= 3) {
+            photoCount = 0;
+        }
+
+        // Make sure video is playing and ready
+        if (video.paused || video.ended) {
+            await video.play();
+        }
+
+        // Wait for next video frame
+        await new Promise(resolve => requestAnimationFrame(resolve));
+
+        // Set canvas size to match video
+        canvas.width = video.videoWidth || video.clientWidth;
+        canvas.height = video.videoHeight || video.clientHeight;
+
+        // Draw current video frame
+        const context = canvas.getContext('2d');
+        context.drawImage(video, 0, 0, canvas.width, canvas.height);
+
+        // Get photo element and update it
         const photoImg = document.getElementById(`photo${photoCount + 1}`);
         if (!photoImg) {
-            throw new Error('Cannot find photo element');
+            throw new Error('Photo element not found');
         }
+
+        // Convert to JPEG with good quality
+        const imageData = canvas.toDataURL('image/jpeg', 0.9);
         
-        const dataUrl = canvas.toDataURL('image/jpeg', 0.8);
+        // Update photo count only after image loads successfully
         photoImg.onload = () => {
             photoCount++;
+            console.log('Photo captured:', photoCount);
+            
             if (photoCount === 3) {
                 editBtn.disabled = false;
                 captureBtn.disabled = true;
             }
         };
-        photoImg.src = dataUrl;
-        
+
+        // Set image source
+        photoImg.src = imageData;
+
     } catch (error) {
-        console.error('Error capturing photo:', error);
-        alert('เกิดข้อผิดพลาดในการถ่ายภาพ กรุณาลองใหม่');
+        console.error('Capture error:', error);
+        alert('เกิดข้อผิดพลาดในการถ่ายภาพ: ' + error.message);
     }
 });
 
