@@ -16,6 +16,38 @@ async function initCamera() {
     }
 }
 
+// Add after initCamera()
+const uploadBtn = document.getElementById('uploadBtn');
+const fileInput = document.createElement('input');
+fileInput.type = 'file';
+fileInput.accept = 'image/*';
+fileInput.multiple = true;
+fileInput.style.display = 'none';
+
+uploadBtn.addEventListener('click', () => {
+    fileInput.click();
+});
+
+fileInput.addEventListener('change', (e) => {
+    const files = Array.from(e.target.files);
+    files.forEach((file, index) => {
+        if (index >= 3) return; // Limit to 3 photos
+        
+        const reader = new FileReader();
+        reader.onload = (event) => {
+            const photoImg = document.getElementById(`photo${index + 1}`);
+            photoImg.src = event.target.result;
+            photoCount++;
+            
+            if (photoCount >= 3) {
+                editBtn.disabled = false;
+                captureBtn.disabled = true;
+            }
+        };
+        reader.readAsDataURL(file);
+    });
+});
+
 // Capture photo
 captureBtn.addEventListener('click', () => {
     if (photoCount >= 3) {
@@ -59,6 +91,24 @@ document.querySelectorAll('.filter-btn').forEach(btn => {
         const filter = btn.dataset.filter;
         document.querySelectorAll('.photo').forEach(photo => {
             photo.style.filter = filters[filter] || '';
+        });
+    });
+});
+
+// Add live preview for filters
+document.querySelectorAll('.filter-btn').forEach(btn => {
+    btn.addEventListener('mouseover', () => {
+        const filter = btn.dataset.filter;
+        const tempFilter = filters[filter] || '';
+        document.querySelectorAll('.photo').forEach(photo => {
+            photo.dataset.originalFilter = photo.style.filter;
+            photo.style.filter = tempFilter;
+        });
+    });
+
+    btn.addEventListener('mouseout', () => {
+        document.querySelectorAll('.photo').forEach(photo => {
+            photo.style.filter = photo.dataset.originalFilter || '';
         });
     });
 });
@@ -180,6 +230,32 @@ document.querySelectorAll('.frame-option').forEach(frame => {
                     photo.style.borderImage = 'url("frames/glitter-border.png") 30 round';
                     break;
             }
+        });
+    });
+});
+
+// Add preview for frames
+document.querySelectorAll('.frame-option').forEach(frame => {
+    frame.addEventListener('mouseover', () => {
+        const frameStyle = frame.dataset.frame;
+        document.querySelectorAll('.photo').forEach(photo => {
+            photo.dataset.originalBorder = photo.style.border;
+            photo.dataset.originalBorderImage = photo.style.borderImage;
+            
+            switch(frameStyle) {
+                case 'cute-pink':
+                    photo.style.border = '5px solid #ff69b4';
+                    photo.style.borderImage = 'linear-gradient(45deg, #ff69b4, #ff1493) 1';
+                    break;
+                // ...existing frame cases...
+            }
+        });
+    });
+
+    frame.addEventListener('mouseout', () => {
+        document.querySelectorAll('.photo').forEach(photo => {
+            photo.style.border = photo.dataset.originalBorder || '';
+            photo.style.borderImage = photo.dataset.originalBorderImage || '';
         });
     });
 });
