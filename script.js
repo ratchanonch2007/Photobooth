@@ -12,42 +12,45 @@ async function initCamera() {
     const videoElement = document.getElementById('video');
     
     try {
-        // Make sure any old stream is stopped
+        if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+            throw new Error('กล้องไม่พร้อมใช้งาน หรือ เบราว์เซอร์ไม่รองรับการใช้งานกล้อง');
+        }
+
+        // Stop any existing streams
         if (stream) {
             stream.getTracks().forEach(track => track.stop());
         }
 
+        // Request camera access
         stream = await navigator.mediaDevices.getUserMedia({
             video: {
                 facingMode: 'user',
                 width: { ideal: 1280 },
                 height: { ideal: 720 }
-            },
-            audio: false
+            }
         });
 
+        // Set up video element
         videoElement.srcObject = stream;
-        await videoElement.play(); // Ensure video is playing
-
+        
         // Wait for video to be ready
         await new Promise((resolve) => {
             videoElement.onloadedmetadata = () => {
-                canvas.width = videoElement.videoWidth;
-                canvas.height = videoElement.videoHeight;
-                resolve();
+                videoElement.play().then(resolve);
             };
         });
 
+        // Update UI
         cameraMessage.style.display = 'none';
         videoElement.style.display = 'block';
         captureBtn.disabled = false;
-        
+
     } catch (err) {
         console.error('Camera error:', err);
         cameraMessage.style.display = 'block';
         videoElement.style.display = 'none';
         captureBtn.disabled = true;
-        alert('กรุณาอนุญาตการใช้งานกล้อง หรือตรวจสอบว่ากล้องไม่ได้ถูกใช้งานโดยโปรแกรมอื่น');
+        alert(err.message || 'กรุณาอนุญาตการใช้งานกล้อง หรือตรวจสอบว่ากล้องไม่ได้ถูกใช้งานโดยโปรแกรมอื่น');
     }
 }
 
@@ -101,51 +104,36 @@ fileInput.addEventListener('change', (e) => {
 captureBtn.addEventListener('click', async () => {
     try {
         if (!stream || !video.srcObject) {
-            throw new Error('Camera not ready');
+            throw new Error('กรุณารอให้กล้องพร้อมใช้งาน');
         }
 
-        // Reset counter if needed
         if (photoCount >= 3) {
             photoCount = 0;
+            document.querySelectorAll('.photo').forEach(photo => photo.src = '');
         }
 
-        // Make sure video is playing and ready
-        if (video.paused || video.ended) {
-            await video.play();
-        }
-
-        // Wait for next video frame
-        await new Promise(resolve => requestAnimationFrame(resolve));
-
-        // Set canvas size to match video
-        canvas.width = video.videoWidth || video.clientWidth;
-        canvas.height = video.videoHeight || video.clientHeight;
-
-        // Draw current video frame
         const context = canvas.getContext('2d');
+        canvas.width = video.videoWidth;
+        canvas.height = video.videoHeight;
+        
+        // Ensure we get the latest frame
+        await new Promise(resolve => requestAnimationFrame(resolve));
         context.drawImage(video, 0, 0, canvas.width, canvas.height);
 
-        // Get photo element and update it
         const photoImg = document.getElementById(`photo${photoCount + 1}`);
-        if (!photoImg) {
-            throw new Error('Photo element not found');
-        }
-
-        // Convert to JPEG with good quality
         const imageData = canvas.toDataURL('image/jpeg', 0.9);
-        
-        // Update photo count only after image loads successfully
+
         photoImg.onload = () => {
             photoCount++;
             console.log('Photo captured:', photoCount);
             
             if (photoCount === 3) {
                 editBtn.disabled = false;
-                captureBtn.disabled = true;
+                // Don't disable capture button to allow retaking photos
+                alert('ถ่ายภาพครบ 3 รูปแล้ว คุณสามารถแก้ไขภาพหรือถ่ายใหม่ได้');
             }
         };
 
-        // Set image source
         photoImg.src = imageData;
 
     } catch (error) {

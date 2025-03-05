@@ -6,9 +6,23 @@
 }
 
 body {
-    background: linear-gradient(135deg, #fce4ec 0%, #f8bbd0 100%);
+    background: linear-gradient(45deg, 
+        #fce4ec 0%, 
+        #f8bbd0 25%, 
+        #f48fb1 50%, 
+        #f8bbd0 75%, 
+        #fce4ec 100%
+    );
+    background-size: 400% 400%;
+    animation: gradientBG 15s ease infinite;
     min-height: 100vh;
     padding: 20px;
+}
+
+@keyframes gradientBG {
+    0% { background-position: 0% 50%; }
+    50% { background-position: 100% 50%; }
+    100% { background-position: 0% 50%; }
 }
 
 .container {
@@ -41,16 +55,25 @@ body {
 .captured-photos {
     display: flex;
     justify-content: center;
-    gap: 10px;
+    gap: 15px;
     margin: 20px 0;
+    flex-wrap: wrap;
+    max-width: 900px;
+    margin: 20px auto;
 }
 
 .photo {
-    width: 200px;
-    height: 150px;
+    width: 250px;
+    height: 200px;
     border: 3px solid #f48fb1;
     border-radius: 10px;
     object-fit: cover;
+    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+    transition: transform 0.3s ease;
+}
+
+.photo:hover {
+    transform: scale(1.05);
 }
 
 .btn {
