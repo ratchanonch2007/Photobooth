@@ -8,6 +8,40 @@ const saveBtn = document.getElementById('saveBtn');
 
 let selectedFrame = 'classic';
 
+let currentStream = null;
+let facingMode = "user"; // Start with front camera
+
+async function initCamera() {
+    try {
+        if (currentStream) {
+            currentStream.getTracks().forEach(track => track.stop());
+        }
+
+        const constraints = {
+            video: {
+                facingMode: facingMode,
+                width: { ideal: 1280 },
+                height: { ideal: 720 }
+            }
+        };
+
+        const stream = await navigator.mediaDevices.getUserMedia(constraints);
+        currentStream = stream;
+        document.getElementById('video').srcObject = stream;
+    } catch (err) {
+        console.error('Error accessing camera:', err);
+        alert('กรุณาอนุญาตการใช้งานกล้อง');
+    }
+}
+
+document.getElementById('switchCameraBtn').addEventListener('click', () => {
+    facingMode = facingMode === "user" ? "environment" : "user";
+    initCamera();
+});
+
+// Initial camera setup
+initCamera();
+
 // เพิ่ม object สำหรับเก็บค่าสีและอีโมจิของแต่ละ frame
 const frameStyles = {
     classic: {
@@ -45,37 +79,6 @@ document.querySelectorAll('.frame-option').forEach(option => {
         selectedFrame = option.dataset.frame;
     });
 });
-
-async function initCamera() {
-    try {
-        // ตรวจสอบว่าเป็นมือถือหรือไม่
-        const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
-        
-        const constraints = {
-            video: {
-                facingMode: isMobile ? "environment" : "user",
-                width: { ideal: isMobile ? 1280 : 1920 },
-                height: { ideal: isMobile ? 720 : 1080 }
-            }
-        };
-
-        stream = await navigator.mediaDevices.getUserMedia(constraints);
-        video.srcObject = stream;
-        
-        // ปรับการแสดงผลวิดีโอตามอุปกรณ์
-        video.style.transform = isMobile ? 'scaleX(1)' : 'scaleX(-1)';
-        
-        await video.play();
-        captureBtn.disabled = false;
-
-        // ปรับขนาด canvas ตามวิดีโอ
-        canvas.width = video.videoWidth;
-        canvas.height = video.videoHeight;
-    } catch (err) {
-        console.error('Camera error:', err);
-        alert('กรุณาอนุญาตการใช้งานกล้อง');
-    }
-}
 
 // เพิ่มฟังก์ชันลบรูปภาพ
 document.querySelectorAll('.delete-btn').forEach(btn => {
@@ -254,9 +257,6 @@ window.addEventListener('orientationchange', () => {
         video.style.height = 'auto';
     }, 200);
 });
-
-// Initialize camera
-initCamera();
 
 // Cleanup on page unload
 window.addEventListener('beforeunload', () => {
